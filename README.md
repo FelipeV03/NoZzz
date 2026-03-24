@@ -19,12 +19,12 @@ Click derecho sobre el ícono para **Activar / Desactivar / Salir**.
 
 ## Requisitos
 
-- Windows
+- Windows 10 / 11
 - Python 3.x
 - Dependencias:
 
 ```bash
-pip install pystray pillow pyinstaller
+pip install pystray pillow
 ```
 
 ## Uso (script Python)
@@ -40,12 +40,19 @@ python NoZzz.py
 python NoZzz_icon.py
 ```
 
-**2. Compila:**
+**2. Instala Nuitka:**
 ```bash
-pyinstaller --onefile --noconsole --icon=nozzz.ico --name=NoZzz NoZzz.py
+pip install nuitka
 ```
 
-El `.exe` quedará en la carpeta `dist/`.
+**3. Compila:**
+```bash
+python -m nuitka --onefile --windows-console-mode=disable --windows-icon-from-ico=nozzz.ico --include-package=pystray --include-package=PIL --output-filename=NoZzz.exe NoZzz.py
+```
+
+El `.exe` quedará en la misma carpeta del proyecto.
+
+> Se recomienda Nuitka sobre PyInstaller ya que genera ejecutables con menos falsos positivos en antivirus.
 
 ## ¿Por qué es seguro?
 
@@ -54,3 +61,4 @@ El `.exe` quedará en la carpeta `dist/`.
 - No hace conexiones de red
 - No escribe en el registro de Windows
 - No accede a archivos del sistema
+- Compilado con Nuitka (no PyInstaller) para evitar falsos positivos en antivirus
