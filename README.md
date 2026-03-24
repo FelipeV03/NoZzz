@@ -1,52 +1,56 @@
-# Keep Awake
+# NoZzz
 
 Evita que Windows suspenda el PC mientras el programa está en ejecución.
-Usa la API oficial de Windows (`SetThreadExecutionState`). Sin malware, código 100% visible.
+Corre en la bandeja del sistema (system tray). Sin malware, código 100% visible.
 
 ## ¿Cómo funciona?
 
-Llama directamente a la API de Windows para indicarle al sistema que hay actividad en curso.
+Usa la API oficial de Windows (`SetThreadExecutionState`) para indicarle al sistema que hay actividad en curso.
 No simula movimiento del mouse ni teclas. No requiere permisos de administrador.
+
+## Ícono en bandeja del sistema
+
+| Ícono | Significado |
+|---|---|
+| Ojo abierto + punto verde | **Activo** — el PC no se suspenderá |
+| Ojo cerrado + punto rojo | **Inactivo** — suspensión normal |
+
+Click derecho sobre el ícono para **Activar / Desactivar / Salir**.
 
 ## Requisitos
 
 - Windows
 - Python 3.x
+- Dependencias:
+
+```bash
+pip install pystray pillow pyinstaller
+```
 
 ## Uso (script Python)
 
 ```bash
-python keep_awake.py
+python NoZzz.py
 ```
-
-Elige entre:
-1. Solo evitar suspensión del sistema (ideal para bots/procesos en segundo plano)
-2. Evitar suspensión + mantener pantalla encendida
-
-Presiona `Ctrl+C` para salir y restaurar el comportamiento normal.
 
 ## Compilar a .exe
 
-Instala PyInstaller si no lo tienes:
-
+**1. Genera el ícono:**
 ```bash
-pip install pyinstaller
+python NoZzz_icon.py
 ```
 
-Compila:
-
+**2. Compila:**
 ```bash
-pyinstaller --onefile --noconsole keep_awake.py
+pyinstaller --onefile --noconsole --icon=nozzz.ico --name=NoZzz NoZzz.py
 ```
 
 El `.exe` quedará en la carpeta `dist/`.
 
-> Nota: `--noconsole` oculta la ventana de terminal. Quítalo si prefieres ver la consola.
-
 ## ¿Por qué es seguro?
 
-- El código fuente es completamente visible
-- Solo usa `ctypes` (librería estándar de Python) y `time`
+- Código fuente completamente visible
+- Solo usa `ctypes`, `pystray` y `Pillow`
 - No hace conexiones de red
 - No escribe en el registro de Windows
 - No accede a archivos del sistema
