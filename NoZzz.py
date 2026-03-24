@@ -5,6 +5,7 @@ Usa la API oficial de Windows: SetThreadExecutionState
 """
 
 import ctypes
+import ctypes.wintypes
 import threading
 import time
 from PIL import Image, ImageDraw
@@ -13,8 +14,29 @@ import pystray
 ES_CONTINUOUS      = 0x80000000
 ES_SYSTEM_REQUIRED = 0x00000001
 
+INPUT_MOUSE       = 0
+MOUSEEVENTF_MOVE  = 0x0001
+
 active = True
 lock = threading.Lock()
+
+
+class MOUSEINPUT(ctypes.Structure):
+    _fields_ = [
+        ("dx",          ctypes.c_long),
+        ("dy",          ctypes.c_long),
+        ("mouseData",   ctypes.c_ulong),
+        ("dwFlags",     ctypes.c_ulong),
+        ("time",        ctypes.c_ulong),
+        ("dwExtraInfo", ctypes.POINTER(ctypes.c_ulong)),
+    ]
+
+
+class INPUT(ctypes.Structure):
+    _fields_ = [
+        ("type", ctypes.c_ulong),
+        ("mi",   MOUSEINPUT),
+    ]
 
 
 def draw_icon(size, is_active):
@@ -91,13 +113,34 @@ def draw_icon(size, is_active):
     return img
 
 
+def simulate_activity():
+    """Inyecta un micro-movimiento de mouse via SendInput (reconocido por Windows como input real)."""
+    inp_move = INPUT()
+    inp_move.type = INPUT_MOUSE
+    inp_move.mi.dx = 1
+    inp_move.mi.dy = 0
+    inp_move.mi.dwFlags = MOUSEEVENTF_MOVE
+
+    inp_back = INPUT()
+    inp_back.type = INPUT_MOUSE
+    inp_back.mi.dx = -1
+    inp_back.mi.dy = 0
+    inp_back.mi.dwFlags = MOUSEEVENTF_MOVE
+
+    ctypes.windll.user32.SendInput(1, ctypes.byref(inp_move), ctypes.sizeof(INPUT))
+    time.sleep(0.05)
+    ctypes.windll.user32.SendInput(1, ctypes.byref(inp_back), ctypes.sizeof(INPUT))
+
+
 def keep_awake_loop():
     while True:
         with lock:
             is_active = active
         flags = (ES_CONTINUOUS | ES_SYSTEM_REQUIRED) if is_active else ES_CONTINUOUS
         ctypes.windll.kernel32.SetThreadExecutionState(flags)
-        time.sleep(30)
+        if is_active:
+            simulate_activity()
+        time.sleep(50)  # Cada 50s — seguro para políticas de bloqueo desde 1 minuto
 
 
 def on_toggle(icon, item):
