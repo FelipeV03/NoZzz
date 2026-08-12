@@ -1,0 +1,25 @@
+# Bytecode / cache de Python
+__pycache__/
+*.py[cod]
+
+# Entornos virtuales
+.venv/
+venv/
+env/
+
+# Artefactos de compilación (Nuitka)
+NoZzz.build/
+NoZzz.dist/
+NoZzz.onefile-build/
+*.exe
+
+# Ícono generado por NoZzz_icon.py
+*.ico
+
+# Editor / IDE
+.vscode/
+.idea/
+
+# Sistema operativo
+Thumbs.db
+.DS_Store
